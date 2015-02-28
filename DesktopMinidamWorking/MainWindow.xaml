@@ -1,7 +1,7 @@
 ﻿<Window x:Class="DesktopMinidamWorking.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="働くミニダム" Height="193" Width="211" AllowsTransparency="True" WindowStyle="None" Background="Transparent" MouseLeftButtonDown="Window_MouseLeftButtonDown" ResizeMode="NoResize" ShowInTaskbar="False">
+        Title="働くミニダム" Height="193" Width="211" AllowsTransparency="True" WindowStyle="None" Background="Transparent" MouseLeftButtonDown="Window_MouseLeftButtonDown" ResizeMode="NoResize" ShowInTaskbar="False" Icon="images/icon.ico" Closing="Window_Closing">
     <Window.ContextMenu>
         <ContextMenu>
             <MenuItem x:Name="MenuItemTopmost" Header="最前面に表示" IsCheckable="True" IsChecked="{Binding menuTopmostChecked}" Checked="MenuItemTopmost_CheckToggled" Unchecked="MenuItemTopmost_CheckToggled" />
