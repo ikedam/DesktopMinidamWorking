@@ -20,9 +20,34 @@ namespace DesktopMinidamWorking
     /// </summary>
     public partial class MainWindow : Window
     {
+        public bool menuTopmostChecked { get; set; }
         public MainWindow()
         {
             InitializeComponent();
+            // デザイナのプロパティをこのオブジェクトにバインド
+            this.ContextMenu.DataContext = this;
+            // 画面右下に表示
+            Top = System.Windows.SystemParameters.WorkArea.Top
+                + System.Windows.SystemParameters.WorkArea.Height
+                - Height;
+            Left = System.Windows.SystemParameters.WorkArea.Left
+                + System.Windows.SystemParameters.WorkArea.Width
+                - Width;
+        }
+
+        private void MenuItemQuit_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
+
+        private void MenuItemTopmost_CheckToggled(object sender, RoutedEventArgs e)
+        {
+            Topmost = menuTopmostChecked;
         }
     }
 }
