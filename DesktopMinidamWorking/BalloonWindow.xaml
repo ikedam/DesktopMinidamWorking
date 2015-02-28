@@ -1,0 +1,9 @@
+﻿<Window x:Class="DesktopMinidamWorking.BalloonWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="吹き出し" Height="139" Width="216" ResizeMode="NoResize" WindowStyle="None" AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False">
+    <Grid>
+        <Image Source="images/balloon.png"/>
+        <Label Content="{Binding message}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="90" Width="196" FontFamily="HGSoeiKakupoptai" FontSize="24" />
+    </Grid>
+</Window>
