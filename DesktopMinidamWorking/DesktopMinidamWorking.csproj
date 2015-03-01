@@ -107,6 +107,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\minidam_idle01.png" />
+    <Resource Include="images\minidam_idle02.png" />
+    <Resource Include="images\minidam_idle03.png" />
+    <Resource Include="images\minidam_idle04.png" />
+    <Resource Include="images\minidam_talking01.png" />
+    <Resource Include="images\minidam_talking03.png" />
+    <Resource Include="images\minidam_work01.png" />
+    <Resource Include="images\minidam_work02.png" />
+    <Resource Include="images\minidam_work03.png" />
+    <Resource Include="images\minidam_work04.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\icon.ico" />

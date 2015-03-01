@@ -21,6 +21,8 @@ namespace DesktopMinidamWorking
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        private static Random random = new Random();
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name)
         {
@@ -31,6 +33,128 @@ namespace DesktopMinidamWorking
             }
         }
 
+        private enum MinidamState
+        {
+            Idle,       // ひま
+            Working,    // 働いている
+        }
+
+        private enum MinidamSubState
+        {
+            IdleDoNothing,  // ひま / ぼーっとしている
+            IdleBallooning, // ひま / シャボン玉吹いている
+            WorkingEasy,    // 働いている / ゆっくり働いている
+            WorkingNormal,  // 働いている / 普通に働いている
+            WorkingHard,    // 働いている / 激しく働いている
+            WorkingResting, // 働いている / 休憩中
+        }
+
+        private struct KeyFrameTransition
+        {
+            public int possibility; // 遷移確率 (100分率)
+            public int frame;  // 遷移先のフレーム
+
+            public KeyFrameTransition(int possibility, int frame)
+            {
+                this.possibility = possibility;
+                this.frame = frame;
+            }
+
+            public KeyFrameTransition(int frame)
+            {
+                this.possibility = 100;
+                this.frame = frame;
+            }
+        }
+
+        private struct KeyFrameInformation
+        {
+            public int frame;
+            public string image;
+            public KeyFrameTransition[] transitions;
+
+            public KeyFrameInformation(int frame, string image)
+            {
+                this.frame = frame;
+                this.image = image;
+                this.transitions = new KeyFrameTransition[]{};
+            }
+
+            public KeyFrameInformation(int frame, KeyFrameTransition[] transitions)
+            {
+                this.frame = frame;
+                this.image = null;
+                this.transitions = transitions;
+            }
+
+            public KeyFrameInformation(int frame, int nextFrame)
+            {
+                this.frame = frame;
+                this.image = null;
+                this.transitions = new KeyFrameTransition[] { new KeyFrameTransition(nextFrame) };
+            }
+        }
+
+        private struct AnimationTransition
+        {
+            public int possibility; // 遷移確率
+            public MinidamSubState subState;  // 遷移先の状態
+            public AnimationTransition(int possibility, MinidamSubState subState)
+            {
+                this.possibility = possibility;
+                this.subState = subState;
+            }
+        }
+
+        private struct AnimationInformation
+        {
+            public MinidamSubState subState;
+            public int durationFramesMin;
+            public int durationFramesMax;
+            public string talkingImage;
+            public AnimationTransition[] transitions;
+            public KeyFrameInformation[] keyFrames;
+
+            public AnimationInformation(MinidamSubState subState, int durationFramesMin, int durationFramesMax, string talkingImage, AnimationTransition[] transitions, KeyFrameInformation[] keyFrames)
+            {
+                this.subState = subState;
+                this.durationFramesMin = durationFramesMin;
+                this.durationFramesMax = durationFramesMax;
+                this.talkingImage = talkingImage;
+                this.transitions = transitions;
+                this.keyFrames = keyFrames;
+            }
+        }
+
+        private static AnimationInformation[] animations = {
+            // 暇なとき
+            new AnimationInformation(
+                MinidamSubState.IdleDoNothing,
+                300, 600, "/images/minidam_talking03.png",
+                new AnimationTransition[]{},
+                new KeyFrameInformation[] {
+                    new KeyFrameInformation(1, "/images/minidam_idle01.png"),
+                    new KeyFrameInformation(31, "/images/minidam_idle02.png"),
+                    new KeyFrameInformation(61, 1),
+                }
+            ),
+            // 働いているとき
+            new AnimationInformation(
+                MinidamSubState.WorkingNormal,
+                300, 600, "/images/minidam_talking01.png",
+                new AnimationTransition[]{},
+                new KeyFrameInformation[] {
+                    new KeyFrameInformation(1, "/images/minidam_work01.png"),
+                    new KeyFrameInformation(16, "/images/minidam_work02.png"),
+                    new KeyFrameInformation(31, 1),
+                }
+            ),
+        };
+
+        private MinidamState state;
+        private MinidamSubState subState;
+        private int frame;
+        private int duration;
         private BalloonWindow balloonWindow;
         private System.Windows.Threading.DispatcherTimer timer;
         private ModifierKeys lastModifiers;
@@ -53,11 +177,26 @@ namespace DesktopMinidamWorking
             }
         }
 
+        private string _imageFile;
+        public string imageFile
+        {
+            get
+            {
+                return _imageFile;
+            }
+
+            protected set
+            {
+                _imageFile = value;
+                OnPropertyChanged("imageFile");
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
             // デザイナのプロパティをこのオブジェクトにバインド
-            this.ContextMenu.DataContext = this;
+            this.DataContext = this;
             this.menuTopmostChecked = true;
             // 画面右下に表示
             Top = System.Windows.SystemParameters.WorkArea.Top
@@ -76,6 +215,15 @@ namespace DesktopMinidamWorking
             timer.Interval = TimeSpan.FromMilliseconds(33.3);
             timer.Tick += timer_Tick;
             timer.Start();
+
+            StopWork();
+        }
+
+        private Uri getBundledResurceUri(string name)
+        {
+            // Pack URIs in WPF
+            // https://msdn.microsoft.com/en-us/library/aa970069%28v=vs.110%29.aspx 
+            return new Uri(string.Format("pack://application:,,,{0}", name));
         }
 
         private void InitNotifyIcon()
@@ -86,7 +234,7 @@ namespace DesktopMinidamWorking
 
             // Pack URIs in WPF
             // https://msdn.microsoft.com/en-us/library/aa970069%28v=vs.110%29.aspx 
-            System.IO.Stream s = Application.GetResourceStream(new Uri("pack://application:,,,/images/icon.ico")).Stream;
+            System.IO.Stream s = Application.GetResourceStream(getBundledResurceUri("/images/icon.ico")).Stream;
             notifyIcon.Icon = new System.Drawing.Icon(s);
             notifyIcon.Click += new EventHandler(NotifyIcon_Click);
             notifyIcon.Visible = true;
@@ -128,6 +276,74 @@ namespace DesktopMinidamWorking
 
         private void timer_Tick(object sender, EventArgs e)
         {
+            CheckModifierKeys();
+
+            foreach (AnimationInformation info in animations)
+            {
+                if(info.subState != subState)
+                {
+                    continue;
+                }
+                if(balloonWindow.Visibility != Visibility.Hidden)
+                {
+                    imageFile = info.talkingImage;
+                    break;
+                }
+
+                // 通常のフレーム再生
+                if(frame == 0)
+                {
+                    // フレーム　0 は特別な扱い。
+                    // 継続時間を決定する。
+                    duration = random.Next(info.durationFramesMin, info.durationFramesMax);
+                    frame = 1;
+                }
+                if(--duration <= 0)
+                {
+                    // TODO
+                }
+
+                while (!ProcessFrame(info)) ;
+                ++frame;
+            }
+        }
+
+        private bool ProcessFrame(AnimationInformation info)
+        {
+            foreach(KeyFrameInformation keyInfo in info.keyFrames)
+            {
+                if(keyInfo.frame < frame)
+                {
+                    continue;
+                }
+                else if(keyInfo.frame > frame)
+                {
+                    break;
+                }
+                if (keyInfo.transitions.Length >= 0)
+                {
+                    int possibility = random.Next(100);
+                    foreach (KeyFrameTransition trans in keyInfo.transitions)
+                    {
+                        possibility -= trans.possibility;
+                        if (possibility < 0)
+                        {
+                            frame = trans.frame;
+                            return false;
+                        }
+                    }
+                }
+                if (keyInfo.image != null)
+                {
+                    imageFile = keyInfo.image;
+                }
+                break;
+            }
+            return true;
+        }
+
+        private void CheckModifierKeys()
+        {
             ModifierKeys curModifier = Keyboard.Modifiers & (
                 ModifierKeys.Control
                 | ModifierKeys.Shift
@@ -165,6 +381,33 @@ namespace DesktopMinidamWorking
         {
             balloonWindow.Left = Left + Width / 2 - balloonWindow.Width / 2 - 20;
             balloonWindow.Top = Top - balloonWindow.Height + 40;
+        }
+
+        private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            switch(state)
+            {
+                case MinidamState.Idle:
+                    StartWork();
+                    break;
+                case MinidamState.Working:
+                    StopWork();
+                    break;
+            }
+        }
+
+        private void StartWork()
+        {
+            state = MinidamState.Working;
+            subState = MinidamSubState.WorkingNormal;
+            frame = 0;
+        }
+
+        private void StopWork()
+        {
+            state = MinidamState.Idle;
+            subState = MinidamSubState.IdleDoNothing;
+            frame = 0;
         }
     }
 }
