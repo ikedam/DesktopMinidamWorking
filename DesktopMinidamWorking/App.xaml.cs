@@ -13,5 +13,17 @@ namespace DesktopMinidamWorking
     /// </summary>
     public partial class App : Application
     {
+        private System.Threading.Mutex mutex;
+
+        public App()
+            : base()
+        {
+            mutex = new System.Threading.Mutex(false, "MutexForMinidamWorking");
+            if(!mutex.WaitOne(0))
+            {
+                // すでに起動している
+                Shutdown();
+            }
+        }
     }
 }
