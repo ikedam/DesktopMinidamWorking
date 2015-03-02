@@ -78,6 +78,11 @@ namespace DesktopMinidamWorking
     {
         public int possibility; // 遷移確率
         public AnimationState state;  // 遷移先の状態
+        public AnimationTransition(AnimationState state)
+        {
+            this.possibility = 100;
+            this.state = state;
+        }
         public AnimationTransition(int possibility, AnimationState state)
         {
             this.possibility = possibility;
@@ -131,23 +136,67 @@ namespace DesktopMinidamWorking
             // 暇なとき
             new AnimationDefinition(
                 AnimationState.IdleDoNothing,
-                300, 600, "/images/minidam_talking03.png",
-                new AnimationTransition[]{},
+                90, 300, "/images/minidam_talking03.png",
+                new AnimationTransition[]{
+                    new AnimationTransition(AnimationState.IdleBallooning),
+                },
                 new KeyFrameInformation[] {
                     new KeyFrameInformation(1, "/images/minidam_idle01.png"),
-                    new KeyFrameInformation(31, "/images/minidam_idle02.png"),
-                    new KeyFrameInformation(61, 1),
                 }
             ),
-            // 働いているとき
+            // 暇なとき (シャボン玉)
+            new AnimationDefinition(
+                AnimationState.IdleBallooning,
+                60, 60, "/images/minidam_talking03.png",
+                new AnimationTransition[]{
+                    new AnimationTransition(AnimationState.IdleDoNothing),
+                },
+                new KeyFrameInformation[] {
+                    new KeyFrameInformation(1, "/images/minidam_idle02.png"),
+                    new KeyFrameInformation(31, "/images/minidam_idle03.png"),
+                    new KeyFrameInformation(46, "/images/minidam_idle04.png"),
+                }
+            ),
+            // 働いているとき (通常)
             new AnimationDefinition(
                 AnimationState.WorkingNormal,
                 300, 600, "/images/minidam_talking01.png",
-                new AnimationTransition[]{},
+                new AnimationTransition[]{
+                    new AnimationTransition(30, AnimationState.WorkingEasy),
+                    new AnimationTransition(30, AnimationState.WorkingHard),
+                },
                 new KeyFrameInformation[] {
                     new KeyFrameInformation(1, "/images/minidam_work01.png"),
-                    new KeyFrameInformation(16, "/images/minidam_work02.png"),
-                    new KeyFrameInformation(31, 1),
+                    new KeyFrameInformation(11, "/images/minidam_work02.png"),
+                    new KeyFrameInformation(21, 1),
+                }
+            ),
+            // 働いているとき (ゆっくり)
+            new AnimationDefinition(
+                AnimationState.WorkingEasy,
+                150, 300, "/images/minidam_talking01.png",
+                new AnimationTransition[]{
+                    new AnimationTransition(80, AnimationState.WorkingNormal),
+                    new AnimationTransition(20, AnimationState.WorkingHard),
+                },
+                new KeyFrameInformation[] {
+                    new KeyFrameInformation(1, "/images/minidam_work03.png"),
+                    new KeyFrameInformation(21, "/images/minidam_work04.png"),
+                    new KeyFrameInformation(41, 1),
+                }
+            ),
+            // 働いているとき (激しく)
+            new AnimationDefinition(
+                AnimationState.WorkingHard,
+                150, 300, "/images/minidam_talking01.png",
+                new AnimationTransition[]{
+                    new AnimationTransition(80, AnimationState.WorkingNormal),
+                    new AnimationTransition(20, AnimationState.WorkingEasy),
+                },
+                new KeyFrameInformation[] {
+                    new KeyFrameInformation(1, "/images/minidam_work01.png"),
+                    new KeyFrameInformation(4, "/images/minidam_work02.png"),
+                    new KeyFrameInformation(7, 1),
                 }
             ),
         };

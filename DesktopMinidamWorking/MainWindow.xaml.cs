@@ -91,6 +91,9 @@ namespace DesktopMinidamWorking
             InitializeComponent();
             // デザイナのプロパティをこのオブジェクトにバインド
             this.DataContext = this;
+            // 本来、親の DataContext だけに設定すればいいはずだが、
+            // 最初の表示までは DataContext が作られないとかなんとか。
+            this.ContextMenu.DataContext = this;
             this.menuTopmostChecked = true;
             // 画面右下に表示
             Top = System.Windows.SystemParameters.WorkArea.Top
@@ -136,6 +139,7 @@ namespace DesktopMinidamWorking
 
         private void NotifyIcon_Click(object sender, System.EventArgs e)
         {
+            this.Activate();
             this.ContextMenu.IsOpen = true;
         }
 
@@ -190,7 +194,18 @@ namespace DesktopMinidamWorking
             }
             if(--duration <= 0)
             {
-                // TODO
+                int possibility = random.Next(100);
+                foreach(AnimationTransition trans in def.transitions)
+                {
+                    possibility -= trans.possibility;
+                    if(possibility < 0)
+                    {
+                        animationState = trans.state;
+                        break;
+                    }
+                }
+                frame = 0;
+                return;
             }
 
             while (!ProcessFrame(def)) ;
@@ -258,6 +273,10 @@ namespace DesktopMinidamWorking
             imageFile = talkingImage;
             balloonWindow.message = string.Join("\n", messages);
             balloonWindow.Show();
+            if (balloonWindow.Owner == null)
+            {
+                balloonWindow.Owner = this;
+            }
         }
 
         private void Window_LocationChanged(object sender, EventArgs e)
