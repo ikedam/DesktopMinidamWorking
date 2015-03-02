@@ -39,16 +39,17 @@ namespace DesktopMinidamWorking
          */
         public enum MinidamState
         {
+            Unknown,
             Idle,       // ひま
             Working,    // 働いている
         }
 
-        private MinidamState state;
         private AnimationState animationState;
         private string animationImage;
         private string talkingImage;
         private int frame;
         private int duration;
+        private int talkingDuration = 0;
         private BalloonWindow balloonWindow;
         private System.Windows.Threading.DispatcherTimer timer;
         private ModifierKeys lastModifiers;
@@ -86,6 +87,38 @@ namespace DesktopMinidamWorking
             }
         }
 
+        private MinidamState _state;
+        private MinidamState state
+        {
+            get
+            {
+                return _state;
+            }
+            set
+            {
+                _state = value;
+                OnPropertyChanged("IsIdle");
+                OnPropertyChanged("IsWorking");
+            }
+        }
+
+
+        public bool IsIdle
+        {
+            get
+            {
+                return state == MinidamState.Idle;
+            }
+        }
+
+        public bool IsWorking
+        {
+            get
+            {
+                return state == MinidamState.Working;
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -104,7 +137,7 @@ namespace DesktopMinidamWorking
                 - Width;
 
             balloonWindow = new BalloonWindow();
-            balloonWindow.Visibility = Visibility.Hidden;
+            CloseBalloon();
 
             InitNotifyIcon();
 
@@ -113,6 +146,7 @@ namespace DesktopMinidamWorking
             timer.Tick += timer_Tick;
             timer.Start();
 
+            state = MinidamState.Unknown;
             StopWork();
         }
 
@@ -176,9 +210,16 @@ namespace DesktopMinidamWorking
         {
             CheckModifierKeys();
 
-            if (balloonWindow.Visibility != Visibility.Hidden)
+            if (IsTalking())
             {
                 // しゃべっている間の制御は行わない
+                if(talkingDuration > 0)
+                {
+                    if(--talkingDuration <= 0)
+                    {
+                        CloseBalloon();
+                    }
+                }
                 return;
             }
             
@@ -265,18 +306,35 @@ namespace DesktopMinidamWorking
             }
             if(messages.Count <= 0)
             {
-                balloonWindow.Visibility = Visibility.Hidden;
-                balloonWindow.message = "";
-                imageFile = animationImage;
+                CloseBalloon();
                 return;
             }
+            OpenBalloon(string.Join("\n", messages));
+        }
+
+        private bool IsTalking()
+        {
+            return balloonWindow.Visibility != Visibility.Hidden;
+        }
+
+        private void OpenBalloon(string message, int duration = 0)
+        {
             imageFile = talkingImage;
-            balloonWindow.message = string.Join("\n", messages);
+            talkingDuration = duration;
+            balloonWindow.message = message;
             balloonWindow.Show();
             if (balloonWindow.Owner == null)
             {
                 balloonWindow.Owner = this;
             }
+        }
+        
+        private void CloseBalloon()
+        {
+            balloonWindow.Visibility = Visibility.Hidden;
+            balloonWindow.message = "";
+            talkingDuration = 0;
+            imageFile = animationImage;
         }
 
         private void Window_LocationChanged(object sender, EventArgs e)
@@ -303,13 +361,28 @@ namespace DesktopMinidamWorking
             state = MinidamState.Working;
             animationState = AnimationState.WorkingNormal;
             frame = 0;
+            OpenBalloon("はたらくよ！！", 30);
         }
 
         private void StopWork()
         {
+            if (state == MinidamState.Working)
+            {
+                OpenBalloon("今日のおしごと\nおわり！", 30);
+            }
             state = MinidamState.Idle;
             animationState = AnimationState.IdleDoNothing;
             frame = 0;
+        }
+
+        private void MenuItemWorkStart_Click(object sender, RoutedEventArgs e)
+        {
+            StartWork();
+        }
+
+        private void MenuItemWorkFinish_Click(object sender, RoutedEventArgs e)
+        {
+            StopWork();
         }
     }
 }
