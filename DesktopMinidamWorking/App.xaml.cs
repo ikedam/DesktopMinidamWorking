@@ -25,5 +25,13 @@ namespace DesktopMinidamWorking
                 Shutdown();
             }
         }
+
+        private void Application_SessionEnding(object sender, SessionEndingCancelEventArgs e)
+        {
+            if(MainWindow != null)
+            {
+                (MainWindow as MainWindow).Application_SessionEnding(sender, e);
+            }
+        }
     }
 }

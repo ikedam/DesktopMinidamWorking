@@ -50,6 +50,7 @@ namespace DesktopMinidamWorking
         private int frame;
         private int duration;
         private int talkingDuration = 0;
+        private bool talkingAlert;
         private BalloonWindow balloonWindow;
         private System.Windows.Threading.DispatcherTimer timer;
         private ModifierKeys lastModifiers;
@@ -317,11 +318,14 @@ namespace DesktopMinidamWorking
             return balloonWindow.Visibility != Visibility.Hidden;
         }
 
-        private void OpenBalloon(string message, int duration = 0)
+        private void OpenBalloon(string message, int duration = 0, bool alerting = false)
         {
             imageFile = talkingImage;
             talkingDuration = duration;
+            talkingAlert = alerting;
             balloonWindow.message = message;
+            balloonWindow.Title = Title;
+            balloonWindow.Icon = Icon;
             balloonWindow.Show();
             if (balloonWindow.Owner == null)
             {
@@ -334,6 +338,7 @@ namespace DesktopMinidamWorking
             balloonWindow.Visibility = Visibility.Hidden;
             balloonWindow.message = "";
             talkingDuration = 0;
+            talkingAlert = false;
             imageFile = animationImage;
         }
 
@@ -358,10 +363,11 @@ namespace DesktopMinidamWorking
 
         private void StartWork()
         {
+            OpenBalloon("はたらくよ！！", 30);
+            Title = "働いてるよ！ - 働くミニダム";
             state = MinidamState.Working;
             animationState = AnimationState.WorkingNormal;
             frame = 0;
-            OpenBalloon("はたらくよ！！", 30);
         }
 
         private void StopWork()
@@ -370,6 +376,7 @@ namespace DesktopMinidamWorking
             {
                 OpenBalloon("今日のおしごと\nおわり！", 30);
             }
+            Title = "働くミニダム";
             state = MinidamState.Idle;
             animationState = AnimationState.IdleDoNothing;
             frame = 0;
@@ -383,6 +390,24 @@ namespace DesktopMinidamWorking
         private void MenuItemWorkFinish_Click(object sender, RoutedEventArgs e)
         {
             StopWork();
+        }
+
+        public void Application_SessionEnding(object sender, SessionEndingCancelEventArgs e)
+        {
+            if(IsWorking)
+            {
+                e.Cancel = true;
+                Title = "まだ働いてるよ！ - 働くミニダム";
+                OpenBalloon("まだ働いてるよ！", alerting: true);
+            }
+        }
+
+        private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if(IsTalking() && talkingAlert)
+            {
+                CloseBalloon();
+            }
         }
     }
 }
