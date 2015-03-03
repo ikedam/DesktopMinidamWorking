@@ -7,6 +7,7 @@
             <MenuItem x:Name="MenuItemTopmost" Header="最前面に表示" IsCheckable="True" IsChecked="{Binding menuTopmostChecked}" Checked="MenuItemTopmost_CheckToggled" Unchecked="MenuItemTopmost_CheckToggled" />
             <MenuItem x:Name="MenuItemWorkStart" Header="はたらく" IsEnabled="{Binding IsIdle}" Click="MenuItemWorkStart_Click" />
             <MenuItem x:Name="MenuItemWorkFinish" Header="おしごとおわり" IsEnabled="{Binding IsWorking}" Click="MenuItemWorkFinish_Click" />
+            <MenuItem x:Name="MenuItemOpenReport" Header="勤務記録を見る" Click="MenuItemOpenReport_Click" />
             <MenuItem x:Name="MenuItemQuit" Header="終了" Click="MenuItemQuit_Click" />
         </ContextMenu>
     </Window.ContextMenu>

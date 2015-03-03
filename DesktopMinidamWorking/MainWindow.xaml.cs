@@ -54,6 +54,9 @@ namespace DesktopMinidamWorking
         private BalloonWindow balloonWindow;
         private System.Windows.Threading.DispatcherTimer timer;
         private ModifierKeys lastModifiers;
+        private string reportFile;
+        private DateTime startTime;
+        private DateTime workStartTime;
         // タスクトレイのアイコン
         // なぜか WPF ではサポートされないので、
         // ここだけ　WindowsForm。
@@ -149,6 +152,58 @@ namespace DesktopMinidamWorking
 
             state = MinidamState.Unknown;
             StopWork();
+
+            reportFile = "勤務記録.txt";
+            startTime = DateTime.Now;
+            WriteReport(startTime, "起動したよ");
+        }
+
+        private string GetReportFilePath()
+        {
+            if(System.IO.Path.IsPathRooted(reportFile))
+            {
+                return reportFile;
+            }
+            return System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+                reportFile
+            );
+        }
+
+        private string FormatDuration(int duration)
+        {
+            if(duration < 0)
+            {
+                return "";
+            }
+            TimeSpan span = TimeSpan.FromSeconds(duration);
+            return string.Format("{0}:{1:00}:{2:00}", span.Days * 24 + span.Hours, span.Minutes, span.Seconds);
+        }
+
+        private bool WriteReport(DateTime timeToRecord, string message, int powerOnDuration = -1, int workDuration = -1)
+        {
+            try
+            {
+                string[] values = {
+                    timeToRecord.ToString("yyyy/MM/dd HH:MM:ss"),
+                    message,
+                    FormatDuration(powerOnDuration),
+                    FormatDuration(workDuration),
+                };
+                System.IO.StreamWriter st = new System.IO.StreamWriter(
+                    GetReportFilePath(),
+                    true,
+                    Encoding.GetEncoding("UTF-8")
+                );
+                st.WriteLine(string.Join("\t", values));
+                st.Close();
+            }
+            catch(Exception e)
+            {
+                OpenBalloon("ファイルへの書き込みに失敗したよ！\n" + e.ToString(), alerting: true);
+                return false;
+            }
+            return true;
         }
 
         private Uri getBundledResurceUri(string name)
@@ -196,7 +251,22 @@ namespace DesktopMinidamWorking
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if(notifyIcon != null)
+            if (state != MinidamState.Working)
+            {
+                DateTime stopTime = DateTime.Now;
+                WriteReport(stopTime, "終了したよ！",
+                    powerOnDuration: (int)((stopTime - workStartTime).TotalSeconds)
+                );
+            }
+            else
+            {
+                DateTime stopTime = DateTime.Now;
+                WriteReport(stopTime, "はたらいてるのに終了したよ！",
+                    powerOnDuration: (int)((stopTime - startTime).TotalSeconds),
+                    workDuration: (int)((stopTime - workStartTime).TotalSeconds)
+                );
+            }
+            if (notifyIcon != null)
             {
                 notifyIcon.Dispose();
                 notifyIcon = null;
@@ -363,18 +433,30 @@ namespace DesktopMinidamWorking
 
         private void StartWork()
         {
+            if(state == MinidamState.Working)
+            {
+                return;
+            }
             OpenBalloon("はたらくよ！！", 30);
             Title = "働いてるよ！ - 働くミニダム";
             state = MinidamState.Working;
             animationState = AnimationState.WorkingNormal;
             frame = 0;
+            workStartTime = DateTime.Now;
+            WriteReport(workStartTime, "おしごとはじめ");
         }
 
         private void StopWork()
         {
+            if (state == MinidamState.Idle)
+            {
+                return;
+            }
             if (state == MinidamState.Working)
             {
                 OpenBalloon("今日のおしごと\nおわり！", 30);
+                DateTime workStopTime = DateTime.Now;
+                WriteReport(workStopTime, "おしごとおわり", workDuration: (int)((workStopTime - workStartTime).TotalSeconds));
             }
             Title = "働くミニダム";
             state = MinidamState.Idle;
@@ -407,6 +489,18 @@ namespace DesktopMinidamWorking
             if(IsTalking() && talkingAlert)
             {
                 CloseBalloon();
+            }
+        }
+
+        private void MenuItemOpenReport_Click(object sender, RoutedEventArgs e)
+        {
+            if(System.IO.File.Exists(GetReportFilePath()))
+            {
+                System.Diagnostics.Process.Start(GetReportFilePath());
+            }
+            else
+            {
+                OpenBalloon("勤務ファイルがないよ！", alerting: true);
             }
         }
     }
