@@ -185,7 +185,7 @@ namespace DesktopMinidamWorking
             try
             {
                 string[] values = {
-                    timeToRecord.ToString("yyyy/MM/dd HH:MM:ss"),
+                    timeToRecord.ToString("yyyy/MM/dd HH:mm:ss"),
                     message,
                     FormatDuration(powerOnDuration),
                     FormatDuration(workDuration),
