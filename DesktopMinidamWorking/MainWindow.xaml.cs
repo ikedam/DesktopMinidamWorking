@@ -44,6 +44,12 @@ namespace DesktopMinidamWorking
             Working,    // 働いている
         }
 
+        private enum LockKeys
+        {
+            CAPS = 0x01 << 0,
+            NUMLOCK = 0x01 << 1,
+        }
+
         private AnimationState animationState;
         private string animationImage;
         private string talkingImage;
@@ -55,6 +61,7 @@ namespace DesktopMinidamWorking
         private BalloonWindow balloonWindow;
         private System.Windows.Threading.DispatcherTimer timer;
         private ModifierKeys lastModifiers;
+        private LockKeys lastLockKeys;
         private string reportFile;
         private DateTime startTime;
         private DateTime workStartTime;
@@ -445,11 +452,22 @@ namespace DesktopMinidamWorking
                 | ModifierKeys.Shift
                 | ModifierKeys.Alt
             )):0;
-            if (curModifier == lastModifiers)
+            LockKeys curLocks = 0;
+            if (Keyboard.GetKeyStates(Key.CapsLock) == KeyStates.Toggled)
             {
+                curLocks |= LockKeys.CAPS;
+            }
+            if (Keyboard.GetKeyStates(Key.NumLock) == KeyStates.Toggled)
+            {
+                curLocks |= LockKeys.NUMLOCK;
+            }
+            if (curModifier == lastModifiers && (curModifier == 0 || curLocks == lastLockKeys))
+            {
+                lastLockKeys = curLocks;
                 return;
             }
             lastModifiers = curModifier;
+            lastLockKeys = curLocks;
             List<string> messages = new List<string>();
             if ((curModifier & ModifierKeys.Shift) != 0)
             {
@@ -467,6 +485,14 @@ namespace DesktopMinidamWorking
             {
                 CloseBalloon();
                 return;
+            }
+            if((curLocks & LockKeys.CAPS) != 0)
+            {
+                messages.Add("CAPS");
+            }
+            if ((curLocks & LockKeys.NUMLOCK) != 0)
+            {
+                messages.Add("NumLock");
             }
             messageToShow = () => OpenBalloon(string.Join("\n", messages));
         }
