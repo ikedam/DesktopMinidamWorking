@@ -33,5 +33,13 @@ namespace DesktopMinidamWorking
                 (MainWindow as MainWindow).Application_SessionEnding(sender, e);
             }
         }
+
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            if(MainWindow != null && MainWindow.IsVisible)
+            {
+                MainWindow.Close();
+            }
+        }
     }
 }

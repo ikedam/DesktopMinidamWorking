@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("DesktopMinidamWorking")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("ikedam.jp")]
 [assembly: AssemblyProduct("DesktopMinidamWorking")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]

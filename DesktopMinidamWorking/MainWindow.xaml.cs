@@ -50,6 +50,7 @@ namespace DesktopMinidamWorking
         private int frame;
         private int duration;
         private int talkingDuration = 0;
+        private bool silentMode;
         private bool talkingAlert;
         private BalloonWindow balloonWindow;
         private System.Windows.Threading.DispatcherTimer timer;
@@ -57,6 +58,10 @@ namespace DesktopMinidamWorking
         private string reportFile;
         private DateTime startTime;
         private DateTime workStartTime;
+
+        private delegate void MessageToShow();
+        private MessageToShow messageToShow;
+
         // タスクトレイのアイコン
         // なぜか WPF ではサポートされないので、
         // ここだけ　WindowsForm。
@@ -73,6 +78,20 @@ namespace DesktopMinidamWorking
             {
                 _menuTopmostChecked = value;
                 OnPropertyChanged("menuTopmostChecked");
+            }
+        }
+
+        private bool _watchModifiers;
+        public bool watchModifiers
+        {
+            get
+            {
+                return _watchModifiers;
+            }
+            set
+            {
+                _watchModifiers = value;
+                OnPropertyChanged("watchModifiers");
             }
         }
 
@@ -131,14 +150,29 @@ namespace DesktopMinidamWorking
             // 本来、親の DataContext だけに設定すればいいはずだが、
             // 最初の表示までは DataContext が作られないとかなんとか。
             this.ContextMenu.DataContext = this;
-            this.menuTopmostChecked = true;
-            // 画面右下に表示
-            Top = System.Windows.SystemParameters.WorkArea.Top
-                + System.Windows.SystemParameters.WorkArea.Height
-                - Height;
-            Left = System.Windows.SystemParameters.WorkArea.Left
-                + System.Windows.SystemParameters.WorkArea.Width
-                - Width;
+
+            silentMode = ((Keyboard.Modifiers & ModifierKeys.Shift) != 0);
+
+            if (Properties.Settings.Default.version != System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString())
+            {
+                Properties.Settings.Default.Upgrade();
+            }
+            if (Properties.Settings.Default.version != null && Properties.Settings.Default.version != "")
+            {
+                // 設定から復旧
+                reportFile = Properties.Settings.Default.reportFile;
+                menuTopmostChecked = Properties.Settings.Default.topmost;
+                watchModifiers = Properties.Settings.Default.watchModifiers;
+                Left = Properties.Settings.Default.X;
+                Top = Properties.Settings.Default.Y;
+            }
+            else
+            {
+                reportFile = "勤務記録.txt";
+                menuTopmostChecked = true;
+                watchModifiers = true;
+                GotoHome();
+            }
 
             balloonWindow = new BalloonWindow();
             CloseBalloon();
@@ -153,9 +187,23 @@ namespace DesktopMinidamWorking
             state = MinidamState.Unknown;
             StopWork();
 
-            reportFile = "勤務記録.txt";
             startTime = DateTime.Now;
             WriteReport(startTime, "起動したよ");
+            if(silentMode)
+            {
+                messageToShow = () => OpenBalloon("デバッグモード", alerting: true);
+            }
+        }
+
+        private void GotoHome()
+        {
+            // 画面右下に表示
+            Left = System.Windows.SystemParameters.WorkArea.Left
+                + System.Windows.SystemParameters.WorkArea.Width
+                - Width;
+            Top = System.Windows.SystemParameters.WorkArea.Top
+                + System.Windows.SystemParameters.WorkArea.Height
+                - Height;
         }
 
         private string GetReportFilePath()
@@ -182,6 +230,11 @@ namespace DesktopMinidamWorking
 
         private bool WriteReport(DateTime timeToRecord, string message, int powerOnDuration = -1, int workDuration = -1)
         {
+            if(silentMode)
+            {
+                // デバッグモード
+                return true;
+            }
             try
             {
                 string[] values = {
@@ -200,7 +253,7 @@ namespace DesktopMinidamWorking
             }
             catch(Exception e)
             {
-                OpenBalloon("ファイルへの書き込みに失敗したよ！\n" + e.ToString(), alerting: true);
+                messageToShow = () => OpenBalloon("ファイルへの書き込みに失敗したよ！\n" + e.ToString(), alerting: true);
                 return false;
             }
             return true;
@@ -235,6 +288,11 @@ namespace DesktopMinidamWorking
 
         private void MenuItemQuit_Click(object sender, RoutedEventArgs e)
         {
+            if (IsWorking)
+            {
+                messageToShow = () => OpenBalloon("まだ働いてるよ！", 30);
+                return;
+            }
             Close();
         }
 
@@ -275,23 +333,41 @@ namespace DesktopMinidamWorking
             {
                 balloonWindow.Close();
             }
+            Properties.Settings.Default.reportFile = reportFile;
+            Properties.Settings.Default.topmost = menuTopmostChecked;
+            Properties.Settings.Default.watchModifiers = watchModifiers;
+            Properties.Settings.Default.X = (int)Left;
+            Properties.Settings.Default.Y = (int)Top;
+            Properties.Settings.Default.version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Properties.Settings.Default.Save();
         }
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            CheckModifierKeys();
-
-            if (IsTalking())
+            if (frame != 0)
             {
-                // しゃべっている間の制御は行わない
-                if(talkingDuration > 0)
+                CheckModifierKeys();
+
+                if (messageToShow != null)
                 {
-                    if(--talkingDuration <= 0)
-                    {
-                        CloseBalloon();
-                    }
+                    // メッセージの表示が予約されている
+                    messageToShow();
+                    messageToShow = null;
+                    return;
                 }
-                return;
+
+                if (IsTalking())
+                {
+                    // しゃべっている間の制御は行わない
+                    if (talkingDuration > 0)
+                    {
+                        if (--talkingDuration <= 0)
+                        {
+                            CloseBalloon();
+                        }
+                    }
+                    return;
+                }
             }
             
             AnimationDefinition def = scenario.GetAnimationDefinition(animationState);
@@ -303,6 +379,10 @@ namespace DesktopMinidamWorking
                 duration = random.Next(def.durationFramesMin, def.durationFramesMax);
                 frame = 1;
                 talkingImage = def.talkingImage;
+                if (IsTalking())
+                {
+                    imageFile = talkingImage;
+                }
             }
             if(--duration <= 0)
             {
@@ -344,7 +424,11 @@ namespace DesktopMinidamWorking
                 }
                 if (keyInfo.image != null)
                 {
-                    imageFile = animationImage = keyInfo.image;
+                    animationImage = keyInfo.image;
+                    if (!IsTalking())
+                    {
+                        imageFile = animationImage;
+                    }
                 }
             }
             return true;
@@ -352,7 +436,11 @@ namespace DesktopMinidamWorking
 
         private void CheckModifierKeys()
         {
-            ModifierKeys curModifier = (talkingImage != null)?(Keyboard.Modifiers & (
+            if (messageToShow != null || (IsTalking() && talkingAlert) || talkingImage == null)
+            {
+                return;
+            }
+            ModifierKeys curModifier = watchModifiers?(Keyboard.Modifiers & (
                 ModifierKeys.Control
                 | ModifierKeys.Shift
                 | ModifierKeys.Alt
@@ -363,15 +451,15 @@ namespace DesktopMinidamWorking
             }
             lastModifiers = curModifier;
             List<string> messages = new List<string>();
-            if((Keyboard.Modifiers & ModifierKeys.Shift) != 0)
+            if ((curModifier & ModifierKeys.Shift) != 0)
             {
                 messages.Add("Shift");
             }
-            if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
+            if ((curModifier & ModifierKeys.Control) != 0)
             {
                 messages.Add("Control");
             }
-            if ((Keyboard.Modifiers & ModifierKeys.Alt) != 0)
+            if ((curModifier & ModifierKeys.Alt) != 0)
             {
                 messages.Add("Alt");
             }
@@ -380,12 +468,12 @@ namespace DesktopMinidamWorking
                 CloseBalloon();
                 return;
             }
-            OpenBalloon(string.Join("\n", messages));
+            messageToShow = () => OpenBalloon(string.Join("\n", messages));
         }
 
         private bool IsTalking()
         {
-            return balloonWindow.Visibility != Visibility.Hidden;
+            return balloonWindow.Visibility != Visibility.Hidden || messageToShow != null;
         }
 
         private void OpenBalloon(string message, int duration = 0, bool alerting = false)
@@ -410,6 +498,7 @@ namespace DesktopMinidamWorking
             talkingDuration = 0;
             talkingAlert = false;
             imageFile = animationImage;
+            messageToShow = null;
         }
 
         private void Window_LocationChanged(object sender, EventArgs e)
@@ -437,7 +526,7 @@ namespace DesktopMinidamWorking
             {
                 return;
             }
-            OpenBalloon("はたらくよ！！", 30);
+            messageToShow = () => OpenBalloon("はたらくよ！！", 30);
             Title = "働いてるよ！ - 働くミニダム";
             state = MinidamState.Working;
             animationState = AnimationState.WorkingNormal;
@@ -454,7 +543,7 @@ namespace DesktopMinidamWorking
             }
             if (state == MinidamState.Working)
             {
-                OpenBalloon("今日のおしごと\nおわり！", 30);
+                messageToShow = () => OpenBalloon("今日のおしごと\nおわり！", 30);
                 DateTime workStopTime = DateTime.Now;
                 WriteReport(workStopTime, "おしごとおわり", workDuration: (int)((workStopTime - workStartTime).TotalSeconds));
             }
@@ -480,7 +569,7 @@ namespace DesktopMinidamWorking
             {
                 e.Cancel = true;
                 Title = "まだ働いてるよ！ - 働くミニダム";
-                OpenBalloon("まだ働いてるよ！", alerting: true);
+                messageToShow = () => OpenBalloon("まだ働いてるよ！", alerting: true);
             }
         }
 
@@ -500,7 +589,34 @@ namespace DesktopMinidamWorking
             }
             else
             {
-                OpenBalloon("勤務ファイルがないよ！", alerting: true);
+                messageToShow = () => OpenBalloon("勤務ファイルがないよ！", alerting: true);
+            }
+        }
+
+        private void MenuItemGoHome_Click(object sender, RoutedEventArgs e)
+        {
+            GotoHome();
+        }
+
+        private void MenuItemSelectReportFile_Click(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.SaveFileDialog dialog = new System.Windows.Forms.SaveFileDialog();
+            dialog.Title = "勤務記録ファイルを指定";
+            dialog.Filter = "テキストファイル|*.txt";
+            dialog.FileName = GetReportFilePath();
+            dialog.CreatePrompt = true;
+            dialog.OverwritePrompt = false;
+            if(dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                reportFile = dialog.FileName;
+                if(!System.IO.File.Exists(reportFile))
+                {
+                    WriteReport(startTime, "起動したよ");
+                    if (IsWorking)
+                    {
+                        WriteReport(workStartTime, "おしごとはじめ");
+                    }
+                }
             }
         }
     }
