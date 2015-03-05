@@ -12,6 +12,7 @@
             <MenuItem x:Name="MenuItemTopmost" Header="最前面に表示" IsCheckable="True" IsChecked="{Binding menuTopmostChecked}" Checked="MenuItemTopmost_CheckToggled" Unchecked="MenuItemTopmost_CheckToggled" />
             <MenuItem x:Name="MenuItemWatchModifiers" Header="キーボードを監視" IsCheckable="True" IsChecked="{Binding watchModifiers}" />
             <MenuItem x:Name="MenuItemSelectReportFile" Header="勤務記録ファイルの指定..." Click="MenuItemSelectReportFile_Click" />
+            <MenuItem x:Name="MenuItemRegisterStartup" Header="スタートアップに登録" IsCheckable="True" IsChecked="{Binding isRegisterStartup}" Checked="MenuItemRegisterStartup_CheckToggled" Unchecked="MenuItemRegisterStartup_CheckToggled" />
             <Separator />
             <MenuItem x:Name="MenuItemQuit" Header="終了" Click="MenuItemQuit_Click" />
         </ContextMenu>

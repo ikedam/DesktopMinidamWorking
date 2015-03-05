@@ -102,6 +102,20 @@ namespace DesktopMinidamWorking
             }
         }
 
+        private bool _registerStartup;
+        public bool isRegisterStartup
+        {
+            get
+            {
+                return _registerStartup;
+            }
+            set
+            {
+                _registerStartup = value;
+                OnPropertyChanged("isRegisterStartup");
+            }
+        }
+
         private string _imageFile;
         public string imageFile
         {
@@ -180,6 +194,7 @@ namespace DesktopMinidamWorking
                 watchModifiers = true;
                 GotoHome();
             }
+            isRegisterStartup = CheckRegisterStartup();
 
             balloonWindow = new BalloonWindow();
             CloseBalloon();
@@ -644,6 +659,60 @@ namespace DesktopMinidamWorking
                     }
                 }
             }
+        }
+
+        private void MenuItemRegisterStartup_CheckToggled(object sender, RoutedEventArgs e)
+        {
+            if (isRegisterStartup)
+            {
+                RegisterStartup();
+            }
+            else
+            {
+                UnregisterStartup();
+            }
+        }
+
+        private void RegisterStartup()
+        {
+            string executable = System.IO.Path.GetFullPath(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string appname = System.Diagnostics.FileVersionInfo.GetVersionInfo(executable).ProductName;
+            Microsoft.Win32.RegistryKey key =
+                Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Run",
+                    writable: true
+                );
+            if (executable != (string)key.GetValue(appname))
+            {
+                key.SetValue(appname, executable);
+            }
+        }
+
+        private void UnregisterStartup()
+        {
+            string executable = System.IO.Path.GetFullPath(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string appname = System.Diagnostics.FileVersionInfo.GetVersionInfo(executable).ProductName;
+            Microsoft.Win32.RegistryKey key =
+                Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Run",
+                    writable: true
+                );
+            if (executable == (string)key.GetValue(appname))
+            {
+                key.DeleteValue(appname);
+            }
+        }
+
+        private bool CheckRegisterStartup()
+        {
+            string executable = System.IO.Path.GetFullPath(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string appname = System.Diagnostics.FileVersionInfo.GetVersionInfo(executable).ProductName;
+            Microsoft.Win32.RegistryKey key =
+                Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Run",
+                    writable: true
+                );
+            return (executable == (string)key.GetValue(appname));
         }
     }
 }
