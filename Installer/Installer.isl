@@ -343,6 +343,7 @@
 		<col def="S0">ISDotNetInstallerArgsRollback</col>
 		<row><td>DesktopMinidamWorking.Primary_output</td><td>{428C92BA-1B67-4DCD-8442-4DDEBEB2D936}</td><td>INSTALLDIR</td><td>2</td><td/><td>desktopminidamworking.primar</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT1</td><td>{CBA3B40F-F7A2-4679-9610-B9852696BDB0}</td><td>INSTALLDIR</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>NewComponent1</td><td>{C25C6E0E-931C-407E-9072-9BAD7BB66472}</td><td>INSTALLDIR</td><td>2</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
 	<table name="Condition">
@@ -1053,6 +1054,7 @@
 		<col key="yes" def="s72">Directory_</col>
 		<col key="yes" def="s72">Component_</col>
 		<row><td>INSTALLDIR</td><td>ISX_DEFAULTCOMPONENT1</td></row>
+		<row><td>INSTALLDIR</td><td>NewComponent1</td></row>
 	</table>
 
 	<table name="CustomAction">
@@ -1176,6 +1178,7 @@
 		<row><td>USERPROFILE</td><td>TARGETDIR</td><td>.:USERPR~1|UserProfile</td><td/><td>0</td><td/></row>
 		<row><td>WindowsFolder</td><td>TARGETDIR</td><td>.:Windows</td><td/><td>0</td><td/></row>
 		<row><td>WindowsVolume</td><td>TARGETDIR</td><td>.:WinRoot</td><td/><td>0</td><td/></row>
+		<row><td>ikedam.jp</td><td>ProgramMenuFolder</td><td>働くミ~1|働くミニダム</td><td/><td>1</td><td/></row>
 	</table>
 
 	<table name="DrLocator">
@@ -1869,6 +1872,7 @@
 		<col key="yes" def="s72">Component_</col>
 		<row><td>AlwaysInstall</td><td>DesktopMinidamWorking.Primary_output</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT1</td></row>
+		<row><td>AlwaysInstall</td><td>NewComponent1</td></row>
 	</table>
 
 	<table name="File">
@@ -2030,6 +2034,7 @@
 		<col def="S0">Miscellaneous</col>
 		<row><td>DesktopMinidamWorking.Primary_output</td><td/><td/><td>_080EFBCF_9860_40E0_BB0C_A02CB5A589A7_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT1</td><td/><td/><td>_0AA84B1C_03AC_4D80_925B_5F8C7621CA44_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>NewComponent1</td><td/><td/><td>_123E1443_B2C4_41E3_87BE_949D4BA66F0C_FILTER</td><td/><td/><td/><td/></row>
 	</table>
 
 	<table name="ISCustomActionReference">
@@ -2648,7 +2653,7 @@
 		<col def="I2">Encoded</col>
 		<col def="S0">Comment</col>
 		<col def="I4">TimeStamp</col>
-		<row><td>COMPANY_NAME</td><td>1041</td><td>ikedam.jp</td><td>0</td><td/><td>967022593</td></row>
+		<row><td>COMPANY_NAME</td><td>1041</td><td>ikedam.jp</td><td>0</td><td/><td>967035925</td></row>
 		<row><td>DN_AlwaysInstall</td><td>1041</td><td>常にインストール</td><td>0</td><td/><td>966993728</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_COLOR</td><td>1041</td><td>このｼｽﾃﾑの色設定では、[ProductName] を実行できません。</td><td>0</td><td/><td>966993728</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_DOTNETVERSION45FULL</td><td>1033</td><td>Microsoft .NET Framework 4.5 Full package or greater needs to be installed for this installation to continue.</td><td>0</td><td/><td>967028865</td></row>
@@ -3462,6 +3467,10 @@
 		<row><td>IDS_PROGMSG_XML_UPDATE_FILE</td><td>1041</td><td>XML ファイル %s を更新しています...</td><td>0</td><td/><td>966993728</td></row>
 		<row><td>IDS_SETUPEXE_EXPIRE_MSG</td><td>1041</td><td>このセットアップは %s まで有効です。セットアップを終了します。</td><td>0</td><td/><td>966993728</td></row>
 		<row><td>IDS_SETUPEXE_LAUNCH_COND_E</td><td>1041</td><td>このセットアップは InstallShield の評価版でビルドされているため、Setup.exe からのみ起動できます。</td><td>0</td><td/><td>966993728</td></row>
+		<row><td>IDS_SHORTCUT_DISPLAY_NAME1</td><td>1033</td><td/><td>0</td><td/><td>967023125</td></row>
+		<row><td>IDS_SHORTCUT_DISPLAY_NAME1</td><td>1041</td><td>働くミ~1|働くミニダム</td><td>0</td><td/><td>967013525</td></row>
+		<row><td>IDS_SHORTCUT_DISPLAY_NAME2</td><td>1033</td><td>働くミニダムのアンインストール</td><td>0</td><td/><td>967036053</td></row>
+		<row><td>IDS_SHORTCUT_DISPLAY_NAME2</td><td>1041</td><td>働くミニダムのアンインストール</td><td>0</td><td/><td>967036053</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO</td><td>1041</td><td>以下のサーバーリストから、ターゲットにするデータベースサーバーを選択します。</td><td>0</td><td/><td>966993728</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO_DB</td><td>1041</td><td>以下のカタログ名一覧から、ターゲットにするデータベース カタログを選択してください。</td><td>0</td><td/><td>966993728</td></row>
 		<row><td>IDS_SQLBROWSE_INTRO_TEMPLATE</td><td>1041</td><td>[IS_SQLBROWSE_INTRO]</td><td>0</td><td/><td>966993728</td></row>
@@ -3751,8 +3760,8 @@
 		<row><td>IDS__TargetReq_DESC_RAM</td><td>1041</td><td>RAM 容量が、[ProductName] の実行に適切ではありません。</td><td>0</td><td/><td>966993728</td></row>
 		<row><td>IDS__TargetReq_DESC_RESOLUTION</td><td>1041</td><td>画面の解像度が、[ProductName] の実行に適切ではありません。</td><td>0</td><td/><td>966993728</td></row>
 		<row><td>ID_STRING1</td><td>1041</td><td/><td>0</td><td/><td>966993728</td></row>
-		<row><td>ID_STRING2</td><td>1041</td><td>http://www.ikedam.jp/</td><td>0</td><td/><td>966993728</td></row>
-		<row><td>ID_STRING3</td><td>1041</td><td>ikedam.jp</td><td>0</td><td/><td>966993728</td></row>
+		<row><td>ID_STRING2</td><td>1041</td><td>http://www.ikedam.jp.com</td><td>0</td><td/><td>967035925</td></row>
+		<row><td>ID_STRING3</td><td>1041</td><td>ikedam.jp</td><td>0</td><td/><td>967035925</td></row>
 		<row><td>ID_STRING4</td><td>1033</td><td>DesktopMinidamWorking</td><td>0</td><td/><td>967031105</td></row>
 		<row><td>ID_STRING4</td><td>1041</td><td>DesktopMinidamWorking</td><td>0</td><td/><td>967031105</td></row>
 		<row><td>IIDS_UITEXT_FeatureUninstalled</td><td>1041</td><td>{&amp;Tahoma9}この機能をアンインストールしたままにします。</td><td>0</td><td/><td>966993728</td></row>
@@ -3863,6 +3872,7 @@
 		<col def="S255">ISBuildSourcePath</col>
 		<col def="I2">ISIconIndex</col>
 		<row><td>ARPPRODUCTICON.exe</td><td/><td>&lt;VSSolutionFolder&gt;\DesktopMinidamWorking\images\icon.ico</td><td>0</td></row>
+		<row><td>Shortcut_CB26341E3A4644E0858F9473E8A97012.exe</td><td/><td>C:\Program Files (x86)\InstallShield\2013LE\Redist\Language Independent\OS Independent\uninstall.ico</td><td>0</td></row>
 	</table>
 
 	<table name="IniFile">
@@ -3995,7 +4005,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>ISTheme</td><td>InstallShield Blue.theme</td></row>
 		<row><td>ISUSLock</td><td>{37B09B5A-E33B-42A3-96A8-36734A7D4A91}</td></row>
 		<row><td>ISUSSignature</td><td>{62808C3F-28BF-4D7F-9A68-7E38903002DC}</td></row>
-		<row><td>ISVisitedViews</td><td>viewAssistant,viewProject,viewISToday,viewUpdateService,viewUI,viewObjects,viewRealSetupDesign</td></row>
+		<row><td>ISVisitedViews</td><td>viewAssistant,viewProject,viewISToday,viewUpdateService,viewUI,viewObjects,viewRealSetupDesign,viewSystemSearch,viewShortcuts</td></row>
 		<row><td>Limited</td><td>1</td></row>
 		<row><td>LockPermissionMode</td><td>1</td></row>
 		<row><td>MsiExecCmdLineOptions</td><td/></row>
@@ -4453,6 +4463,10 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<col def="L255">FileName</col>
 		<col def="s72">DirProperty</col>
 		<col def="i2">InstallMode</col>
+		<row><td>FileKey1</td><td>DesktopMinidamWorking.Primary_output</td><td/><td>ikedam.jp</td><td>2</td></row>
+		<row><td>FileKey2</td><td>DesktopMinidamWorking.Primary_output</td><td/><td>product_name</td><td>2</td></row>
+		<row><td>Shortcut</td><td>NewComponent1</td><td/><td>ikedam.jp</td><td>2</td></row>
+		<row><td>_Built</td><td>DesktopMinidamWorking.Primary_output</td><td/><td>ikedam.jp</td><td>2</td></row>
 	</table>
 
 	<table name="RemoveIniFile">
@@ -4538,6 +4552,8 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<col def="S255">ISComments</col>
 		<col def="S255">ISShortcutName</col>
 		<col def="I4">ISAttributes</col>
+		<row><td>Shortcut</td><td>ikedam.jp</td><td>##IDS_SHORTCUT_DISPLAY_NAME2##</td><td>NewComponent1</td><td>[SystemFolder]msiexec.exe</td><td>/x {971A2B4F-4250-400B-81A6-CA429AB2C8F6}</td><td/><td/><td>Shortcut_CB26341E3A4644E0858F9473E8A97012.exe</td><td>0</td><td>1</td><td/><td/><td/><td/><td/><td/><td/><td/></row>
+		<row><td>_Built</td><td>ikedam.jp</td><td>##IDS_SHORTCUT_DISPLAY_NAME1##</td><td>DesktopMinidamWorking.Primary_output</td><td>AlwaysInstall</td><td/><td/><td/><td/><td/><td>1</td><td/><td/><td/><td/><td/><td/><td/><td/></row>
 	</table>
 
 	<table name="Signature">

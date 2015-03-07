@@ -268,7 +268,7 @@ namespace DesktopMinidamWorking
                 System.IO.StreamWriter st = new System.IO.StreamWriter(
                     GetReportFilePath(),
                     true,
-                    Encoding.GetEncoding("UTF-8")
+                    new UTF8Encoding(false)
                 );
                 st.WriteLine(string.Join("\t", values));
                 st.Close();
@@ -335,7 +335,7 @@ namespace DesktopMinidamWorking
             {
                 DateTime stopTime = DateTime.Now;
                 WriteReport(stopTime, "終了したよ！",
-                    powerOnDuration: (int)((stopTime - workStartTime).TotalSeconds)
+                    powerOnDuration: (int)((stopTime - startTime).TotalSeconds)
                 );
             }
             else
