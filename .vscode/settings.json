@@ -1,0 +1,14 @@
+{
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true
+    },
+    "files.associations": {
+        "*.xaml": "xml"
+    },
+    "omnisharp.useModernNet": false,
+    "omnisharp.enableRoslynAnalyzers": true,
+    "omnisharp.enableEditorConfigSupport": true,
+    "omnisharp.organizeImportsOnFormat": true
+}
+

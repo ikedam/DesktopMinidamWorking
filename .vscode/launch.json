@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch WPF App",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/DesktopMinidamWorking/bin/Debug/DesktopMinidamWorking.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/DesktopMinidamWorking",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "Attach to Process",
+            "type": "clr",
+            "request": "attach",
+            "processName": "DesktopMinidamWorking.exe"
+        }
+    ]
+}
+
