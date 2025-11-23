@@ -29,3 +29,4 @@ if ($vsPath) {
 Write-Error "MSBuildが見つかりません。Visual Studio Build ToolsまたはVisual Studio Communityをインストールしてください。"
 exit 1
 
+
